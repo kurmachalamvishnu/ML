@@ -1,0 +1,26 @@
+# Virtual environments
+venv/
+.ML/
+.ML_new/
+env/
+.venv/
+
+# Python cache & compiled files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyd
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+
+# Large archives & temporary zip files
+*.zip
+
+# IDE & Editor settings
+.vscode/
+.idea/
+
+# OS specific files
+Thumbs.db
+.DS_Store
