@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Account Profiler | AML Sentinel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Customer Account Profiler & Baseline Audit</h3>
+                <p class="text-muted mb-0">Search any banking account (ID 1 - 1000) to inspect historical activity baselines</p>
+            </div>
+        </div>
+
+        <!-- Search Box -->
+        <div class="card card-custom p-4 mb-4">
+            <div class="row g-2 align-items-center">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light"><i class="fa-solid fa-magnifying-glass"></i></span>
+                        <input type="number" class="form-control" id="searchCid" placeholder="Enter Customer Account ID (e.g. 191, 385, 433, 10)..." value="191" min="1" max="1000">
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <button class="btn btn-primary w-100 fw-bold" id="searchBtn">
+                        <i class="fa-solid fa-user-shield me-1"></i> Retrieve Account Profile
+                    </button>
+                </div>
+            </div>
+            <div class="mt-2 text-muted small">
+                Suggested test accounts: 
+                <a href="javascript:void(0)" onclick="loadCid(191)" class="badge bg-light text-dark border">#191 (Smurfing debit)</a>
+                <a href="javascript:void(0)" onclick="loadCid(385)" class="badge bg-light text-dark border">#385 (Layering transfer)</a>
+                <a href="javascript:void(0)" onclick="loadCid(433)" class="badge bg-light text-dark border">#433 (High amount debit)</a>
+                <a href="javascript:void(0)" onclick="loadCid(10)" class="badge bg-light text-dark border">#10 (Standard baseline)</a>
+            </div>
+        </div>
+
+        <!-- Profile Results -->
+        <div class="card card-custom p-4 d-none" id="profileCard">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <div class="bg-primary text-white p-3 rounded-circle fs-4">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                        <h4 class="fw-bold mb-0" id="profTitle">Customer Account #191</h4>
+                        <span class="text-muted small">Account Baseline Statistics from 100,000 Dataset Transactions</span>
+                    </div>
+                </div>
+                <span class="badge bg-success-subtle text-success border border-success px-3 py-2" id="profStatus">
+                    Verified Customer Record
+                </span>
+            </div>
+
+            <!-- Metric Cards -->
+            <div class="row g-3 my-2">
+                <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light text-center">
+                        <div class="text-muted small fw-semibold">HISTORICAL MEAN AMOUNT</div>
+                        <h3 class="fw-bold my-1 text-primary" id="profMean">$5,012.30</h3>
+                        <span class="text-muted small">Customer Average Baseline</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light text-center">
+                        <div class="text-muted small fw-semibold">STANDARD DEVIATION</div>
+                        <h3 class="fw-bold my-1 text-secondary" id="profStd">$2,840.15</h3>
+                        <span class="text-muted small">Amount Volatility Metric (σ)</span>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="p-3 border rounded bg-light text-center">
+                        <div class="text-muted small fw-semibold">TOTAL TRANSACTIONS</div>
+                        <h3 class="fw-bold my-1 text-dark" id="profCount">104</h3>
+                        <span class="text-muted small">Total Screened Records</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="alert alert-info border small mt-3 mb-0">
+                <i class="fa-solid fa-circle-info me-1"></i>
+                <strong>AML Investigation Tip:</strong> When this customer performs an operation with a value exceeding <strong>$8,500</strong> via Transfer/Debit, or has a Z-score deviation $Z > 2.5$, the AML Sentinel engine automatically flags it as a priority compliance investigation alert.
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function loadCid(cid) {
+    document.getElementById('searchCid').value = cid;
+    document.getElementById('searchBtn').click();
+}
+
+document.getElementById('searchBtn').addEventListener('click', async function() {
+    const cid = document.getElementById('searchCid').value;
+    if (!cid) return;
+
+    try {
+        const res = await fetch(`/api/customer-profile/${cid}`);
+        const data = await res.json();
+
+        document.getElementById('profileCard').classList.remove('d-none');
+        document.getElementById('profTitle').innerText = `Customer Account #${cid}`;
+        document.getElementById('profMean').innerText = `$${parseFloat(data.cust_mean_amount).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        document.getElementById('profStd').innerText = `$${parseFloat(data.cust_std_amount).toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+        document.getElementById('profCount').innerText = data.cust_tx_count;
+    } catch(err) {
+        alert('Error fetching customer profile: ' + err);
+    }
+});
+
+// Auto-trigger on page load
+window.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('searchBtn').click();
+});
+</script>
+{% endblock %}

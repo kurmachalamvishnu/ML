@@ -1,0 +1,147 @@
+{% extends "base.html" %}
+
+{% block title %}Project & Team | AML Sentinel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card card-custom p-4 mb-4 text-center">
+            <div class="mb-3">
+                <span class="badge bg-primary fs-6 px-3 py-2 text-uppercase">B.Tech Machine Learning Capstone Project</span>
+            </div>
+            <h2 class="fw-bold mb-2">Anti-Money Laundering Detection Using Machine Learning For Financial Transaction Analysis</h2>
+            <p class="text-muted">A Machine Learning Research and Engineering Implementation submitted in partial fulfillment of the academic requirements.</p>
+
+            <div class="row g-3 justify-content-center my-3 text-start">
+                <div class="col-md-5">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted fw-bold text-uppercase">Student Team</div>
+                        <h6 class="fw-bold my-1 text-dark">K. VISHNU</h6>
+                        <div class="small text-muted">Roll No: <strong>2520030199</strong></div>
+                        <hr class="my-2">
+                        <h6 class="fw-bold my-1 text-dark">U. VIDHATH</h6>
+                        <div class="small text-muted">Roll No: <strong>2520030597</strong></div>
+                    </div>
+                </div>
+                <div class="col-md-5">
+                    <div class="border rounded p-3 bg-light">
+                        <div class="small text-muted fw-bold text-uppercase">Faculty Guidance</div>
+                        <h6 class="fw-bold my-1 text-dark">NIRMALAJYOTHI NARISETTY</h6>
+                        <div class="small text-muted">Department of Computer Science & Engineering</div>
+                        <div class="small text-muted"><strong>KL UNIVERSITY</strong></div>
+                        <hr class="my-2">
+                        <div class="small text-muted">Academic Year: <strong>2026-27 (4th Semester)</strong></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Download Reports Section -->
+            <div class="d-flex justify-content-center gap-3 mt-3">
+                <a href="/download/pdf" class="btn btn-danger fw-bold px-4 py-2">
+                    <i class="fa-solid fa-file-pdf me-2"></i> Download Official PDF Report
+                </a>
+                <a href="/download/docx" class="btn btn-primary fw-bold px-4 py-2">
+                    <i class="fa-solid fa-file-word me-2"></i> Download Word Project Report
+                </a>
+            </div>
+        </div>
+
+        <!-- 10 Instructor Instructions Compliance Accordion -->
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-clipboard-check text-success me-2"></i>Instructor Instructions Compliance Checklist</h5>
+            <div class="accordion" id="instrAccordion">
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc1">
+                            1. Dataset Description (100,000 Records, 6 Raw Features)
+                        </button>
+                    </h2>
+                    <div id="acc1" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            Includes dataset name, source link, 100,000 transaction instances across 1,000 customer accounts, target variable (is_laundering), and class distribution (98.83% Normal vs 1.17% Laundering).
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc2">
+                            2. Data Preprocessing & Zero Data Leakage
+                        </button>
+                    </h2>
+                    <div id="acc2" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            0 missing values, 0 duplicates, One-Hot Encoding for transaction types, StandardScaler fitted strictly on the 80% training set ($X_{train}$) and tested on $X_{test}$ with verified zero data leakage.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc3">
+                            3. Exploratory Data Analysis (EDA)
+                        </button>
+                    </h2>
+                    <div id="acc3" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            Descriptive statistics, class balance breakdown, transaction type distributions, amount boxplots, and correlation heatmaps with text observations under each figure.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc4">
+                            4. Domain Feature Engineering & Typologies
+                        </button>
+                    </h2>
+                    <div id="acc4" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            15 features created: customer historical means, amount z-scores, 7-day rolling velocity counts, structuring flags ($8,500 - $9,999), and temporal calendar attributes.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc5">
+                            5 & 6. Model Training, 5-Fold CV & GridSearchCV Tuning
+                        </button>
+                    </h2>
+                    <div id="acc5" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            6 machine learning architectures evaluated under 5-Fold Stratified Cross-Validation with hyperparameter optimization for Random Forest and XGBoost.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc7">
+                            7 & 8. Model Evaluation & Comparison Table
+                        </button>
+                    </h2>
+                    <div id="acc7" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            Comprehensive evaluation across Accuracy, Precision, Recall, F1-Score, ROC-AUC, and Confusion Matrices. Champion Model: <strong>Gradient Boosting (99.86% Accuracy, 0.9386 F1-Score, 0.9995 ROC-AUC)</strong>.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="accordion-item">
+                    <h2 class="accordion-header">
+                        <button class="accordion-button collapsed fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#acc10">
+                            9 & 10. Live Demonstration on Unseen Data
+                        </button>
+                    </h2>
+                    <div id="acc10" class="accordion-collapse collapse" data-bs-parent="#instrAccordion">
+                        <div class="accordion-body small">
+                            Interactive real-time prediction screener deployed in this web application with automated compliance explanations and batch CSV audit reporting.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Model Analytics | AML Sentinel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Model Analytics & Cross-Validation Hub</h3>
+                <p class="text-muted mb-0">Comparative benchmarking of 6 Machine Learning algorithms evaluated on 20,000 test transactions</p>
+            </div>
+            <div>
+                <span class="badge bg-primary fs-6 px-3 py-2">
+                    <i class="fa-solid fa-trophy me-1"></i> Top Model: Gradient Boosting (F1: 0.9386)
+                </span>
+            </div>
+        </div>
+
+        <!-- Comparison Table Card -->
+        <div class="card card-custom p-4 mb-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-table me-2 text-primary"></i>Model Performance Comparison Benchmark</h5>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Algorithm Architecture</th>
+                            <th>Accuracy</th>
+                            <th>Precision</th>
+                            <th>Recall</th>
+                            <th>F1-Score</th>
+                            <th>ROC-AUC</th>
+                            <th>Status / Decision</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="table-success fw-bold">
+                            <td><i class="fa-solid fa-star text-warning me-1"></i> Gradient Boosting (Champion)</td>
+                            <td>99.86%</td>
+                            <td>95.96%</td>
+                            <td>91.85%</td>
+                            <td>0.9386</td>
+                            <td>0.9995</td>
+                            <td><span class="badge bg-success">SELECTED FOR PRODUCTION</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Tuned XGBoost (GridSearchCV)</td>
+                            <td>99.82%</td>
+                            <td>88.03%</td>
+                            <td>97.85%</td>
+                            <td>0.9268</td>
+                            <td>0.9999</td>
+                            <td><span class="badge bg-primary">Highest Recall (97.85%)</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Random Forest Classifier</td>
+                            <td>99.80%</td>
+                            <td>90.04%</td>
+                            <td>93.13%</td>
+                            <td>0.9156</td>
+                            <td>0.9997</td>
+                            <td><span class="badge bg-secondary">Ensemble Bagging</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Tuned Random Forest</td>
+                            <td>99.78%</td>
+                            <td>89.54%</td>
+                            <td>91.85%</td>
+                            <td>0.9068</td>
+                            <td>0.9997</td>
+                            <td><span class="badge bg-secondary">Optimized Depth</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Decision Tree Classifier</td>
+                            <td>99.52%</td>
+                            <td>72.17%</td>
+                            <td>95.71%</td>
+                            <td>0.8229</td>
+                            <td>0.9779</td>
+                            <td><span class="badge bg-secondary">Single Tree Baseline</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">K-Nearest Neighbors (k=5)</td>
+                            <td>98.98%</td>
+                            <td>68.83%</td>
+                            <td>22.75%</td>
+                            <td>0.3419</td>
+                            <td>0.8869</td>
+                            <td><span class="badge bg-light text-dark border">Distance-based</span></td>
+                        </tr>
+                        <tr>
+                            <td class="fw-semibold">Logistic Regression (Balanced)</td>
+                            <td>95.18%</td>
+                            <td>19.43%</td>
+                            <td>99.57%</td>
+                            <td>0.3252</td>
+                            <td>0.9951</td>
+                            <td><span class="badge bg-light text-dark border">Linear Baseline</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="small text-muted mt-2">
+                * Note: Models evaluated with <strong>5-Fold Stratified Cross-Validation</strong> and <strong>Zero Data Leakage</strong> (StandardScaler fit strictly on $X_{train}$).
+            </div>
+        </div>
+
+        <!-- Visualization Tabs -->
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3"><i class="fa-solid fa-chart-pie me-2 text-info"></i>Visual Evaluation Charts & Inferences</h5>
+            
+            <ul class="nav nav-pills mb-3" id="chartsTab" role="tablist">
+                <li class="nav-item">
+                    <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#tab-cm">Confusion Matrices</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-roc">ROC & PR Curves</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-feat">Feature Importance</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-eda">EDA Distributions</button>
+                </li>
+                <li class="nav-item">
+                    <button class="nav-link" data-bs-toggle="pill" data-bs-target="#tab-corr">Correlation Matrix</button>
+                </li>
+            </ul>
+
+            <div class="tab-content border rounded p-3 bg-light-subtle" id="chartsTabContent">
+                <!-- CM Tab -->
+                <div class="tab-pane fade show active" id="tab-cm">
+                    <h6 class="fw-bold text-center mb-3">Confusion Matrices Across All Evaluated Models (Test Split)</h6>
+                    <div class="text-center">
+                        <img src="/results/confusion_matrices.png" class="img-fluid rounded border shadow-sm" style="max-height: 550px;" alt="Confusion Matrices">
+                    </div>
+                </div>
+
+                <!-- ROC Tab -->
+                <div class="tab-pane fade" id="tab-roc">
+                    <div class="row g-3">
+                        <div class="col-md-6 text-center">
+                            <h6 class="fw-bold mb-2">ROC Curves Comparison</h6>
+                            <img src="/results/roc_curves.png" class="img-fluid rounded border shadow-sm" alt="ROC Curves">
+                        </div>
+                        <div class="col-md-6 text-center">
+                            <h6 class="fw-bold mb-2">Precision-Recall Curves Comparison</h6>
+                            <img src="/results/precision_recall_curves.png" class="img-fluid rounded border shadow-sm" alt="PR Curves">
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Feature Importance -->
+                <div class="tab-pane fade" id="tab-feat">
+                    <h6 class="fw-bold text-center mb-3">Relative Feature Importance (Gradient Boosting)</h6>
+                    <div class="text-center">
+                        <img src="/results/feature_importance.png" class="img-fluid rounded border shadow-sm" style="max-height: 500px;" alt="Feature Importance">
+                    </div>
+                    <p class="small text-muted mt-3 text-center">
+                        The top predictive features are <strong>amount_zscore</strong>, <strong>structuring_flag</strong>, and <strong>rolling_tx_7d</strong>.
+                    </p>
+                </div>
+
+                <!-- EDA Tab -->
+                <div class="tab-pane fade" id="tab-eda">
+                    <h6 class="fw-bold text-center mb-3">Dataset Distributions & Class Breakdown</h6>
+                    <div class="text-center">
+                        <img src="/results/eda_distributions.png" class="img-fluid rounded border shadow-sm" style="max-height: 500px;" alt="EDA Distributions">
+                    </div>
+                </div>
+
+                <!-- Corr Tab -->
+                <div class="tab-pane fade" id="tab-corr">
+                    <h6 class="fw-bold text-center mb-3">Feature Correlation Heatmap</h6>
+                    <div class="text-center">
+                        <img src="/results/correlation_matrix.png" class="img-fluid rounded border shadow-sm" style="max-height: 550px;" alt="Correlation Matrix">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

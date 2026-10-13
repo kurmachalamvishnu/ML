@@ -1,0 +1,183 @@
+{% extends "base.html" %}
+
+{% block title %}Batch Screening | AML Sentinel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-11">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Batch Transaction Screening & Audit</h3>
+                <p class="text-muted mb-0">Upload transaction batches for high-throughput AML compliance screening</p>
+            </div>
+            <div>
+                <button type="button" class="btn btn-outline-primary fw-semibold" id="loadSampleBatchBtn">
+                    <i class="fa-solid fa-vial me-1"></i> Load Test Batch (30 Transactions)
+                </button>
+            </div>
+        </div>
+
+        <!-- Upload Card -->
+        <div class="card card-custom p-4 mb-4">
+            <div class="row align-items-center">
+                <div class="col-md-8">
+                    <h6 class="fw-bold mb-1"><i class="fa-solid fa-cloud-arrow-up text-primary me-2"></i>Upload Transaction Batch CSV</h6>
+                    <p class="small text-muted mb-0">CSV columns expected: <code>transaction_id, customer_id, amount, type, date</code></p>
+                </div>
+                <div class="col-md-4 text-md-end mt-3 mt-md-0">
+                    <input type="file" id="batchFileInput" accept=".csv" class="d-none">
+                    <button class="btn btn-primary" onclick="document.getElementById('batchFileInput').click()">
+                        <i class="fa-solid fa-file-arrow-up me-1"></i> Select CSV File
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Batch Results Area -->
+        <div class="card card-custom p-4 d-none" id="batchResultContainer">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <div class="d-flex align-items-center gap-3">
+                    <h5 class="fw-bold mb-0">Screening Audit Results</h5>
+                    <span class="badge bg-secondary" id="totalProcessedBadge">30 Processed</span>
+                    <span class="badge bg-danger" id="flaggedCountBadge">2 Flagged Suspicious</span>
+                </div>
+                <button class="btn btn-sm btn-success fw-bold" id="downloadReportBtn">
+                    <i class="fa-solid fa-file-export me-1"></i> Export Compliance CSV Report
+                </button>
+            </div>
+
+            <!-- Filter Controls -->
+            <div class="d-flex gap-2 mb-3">
+                <button class="btn btn-sm btn-dark filter-btn active" data-filter="all">All Records</button>
+                <button class="btn btn-sm btn-outline-danger filter-btn" data-filter="flagged">Flagged Suspicious Only</button>
+                <button class="btn btn-sm btn-outline-success filter-btn" data-filter="approved">Approved Only</button>
+            </div>
+
+            <!-- Table -->
+            <div class="table-responsive">
+                <table class="table table-hover align-middle small" id="batchTable">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Tx ID</th>
+                            <th>Customer ID</th>
+                            <th>Amount ($)</th>
+                            <th>Channel</th>
+                            <th>Risk Score</th>
+                            <th>Risk Tier</th>
+                            <th>Status Decision</th>
+                            <th>Primary Reason Trigger</th>
+                        </tr>
+                    </thead>
+                    <tbody id="batchTableBody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentBatchData = [];
+
+document.getElementById('loadSampleBatchBtn').addEventListener('click', async function() {
+    this.disabled = true;
+    this.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Generating & Screening Test Batch...';
+
+    try {
+        const response = await fetch('/api/batch-sample');
+        const data = await response.json();
+        renderBatchTable(data);
+    } catch(err) {
+        alert('Failed to load sample batch: ' + err);
+    } finally {
+        this.disabled = false;
+        this.innerHTML = '<i class="fa-solid fa-vial me-1"></i> Load Test Batch (30 Transactions)';
+    }
+});
+
+document.getElementById('batchFileInput').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/api/batch-upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.error) alert(data.error);
+        else renderBatchTable(data);
+    })
+    .catch(err => alert('Upload error: ' + err));
+});
+
+function renderBatchTable(data) {
+    currentBatchData = data;
+    document.getElementById('batchResultContainer').classList.remove('d-none');
+    document.getElementById('totalProcessedBadge').innerText = `${data.length} Processed`;
+
+    const flagged = data.filter(d => d.decision.includes('FLAGGED')).length;
+    document.getElementById('flaggedCountBadge').innerText = `${flagged} Flagged Suspicious`;
+
+    filterAndRender('all');
+}
+
+function filterAndRender(filterType) {
+    const tbody = document.getElementById('batchTableBody');
+    tbody.innerHTML = '';
+
+    const filtered = currentBatchData.filter(d => {
+        if (filterType === 'flagged') return d.decision.includes('FLAGGED');
+        if (filterType === 'approved') return d.decision.includes('APPROVED');
+        return true;
+    });
+
+    filtered.forEach(row => {
+        const isFlagged = row.decision.includes('FLAGGED');
+        const tr = document.createElement('tr');
+        tr.className = isFlagged ? 'table-danger' : '';
+        tr.innerHTML = `
+            <td class="code-font fw-bold">#${row.transaction_id}</td>
+            <td>Account ${row.customer_id}</td>
+            <td class="fw-bold">$${parseFloat(row.amount).toLocaleString('en-US', {minimumFractionDigits: 2})}</td>
+            <td><span class="badge bg-secondary text-uppercase">${row.type}</span></td>
+            <td><span class="fw-bold text-${isFlagged ? 'danger' : 'success'}">${row.risk_score}</span></td>
+            <td><span class="badge bg-${isFlagged ? 'danger' : 'success'}">${row.risk_tier}</span></td>
+            <td><span class="badge ${isFlagged ? 'bg-danger text-white' : 'bg-success text-white'}">${row.decision}</span></td>
+            <td class="text-secondary">${row.top_reason}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.addEventListener('click', function() {
+        document.querySelectorAll('.filter-btn').forEach(b => {
+            b.classList.remove('active');
+            if (b.classList.contains('btn-dark')) b.className = 'btn btn-sm btn-outline-dark filter-btn';
+        });
+        this.classList.add('active');
+        filterAndRender(this.getAttribute('data-filter'));
+    });
+});
+
+document.getElementById('downloadReportBtn').addEventListener('click', function() {
+    if (currentBatchData.length === 0) return;
+    let csv = 'Transaction_ID,Customer_ID,Amount,Type,Risk_Score,Risk_Tier,Decision,Primary_Reason\n';
+    currentBatchData.forEach(r => {
+        csv += `"${r.transaction_id}","${r.customer_id}","${r.amount}","${r.type}","${r.risk_score}","${r.risk_tier}","${r.decision}","${r.top_reason.replace(/"/g, '""')}"\n`;
+    });
+
+    const blob = new Blob([csv], {type: 'text/csv'});
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'AML_Compliance_Audit_Report.csv');
+    a.click();
+});
+</script>
+{% endblock %}

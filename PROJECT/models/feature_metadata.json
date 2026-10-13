@@ -1,0 +1,30 @@
+{
+  "features": [
+    "amount",
+    "cust_mean_amount",
+    "cust_std_amount",
+    "cust_tx_count",
+    "amount_to_cust_mean",
+    "amount_zscore",
+    "month",
+    "day",
+    "dayofweek",
+    "is_weekend",
+    "rolling_tx_7d",
+    "structuring_flag",
+    "type_credit",
+    "type_debit",
+    "type_transfer"
+  ],
+  "types": [
+    "credit",
+    "debit",
+    "transfer"
+  ],
+  "thresholds": {
+    "structuring_min": 8500,
+    "structuring_max": 9999,
+    "zscore_high_risk": 2.7,
+    "risk_decision_threshold": 0.5
+  }
+}

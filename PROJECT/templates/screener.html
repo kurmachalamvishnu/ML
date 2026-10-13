@@ -1,0 +1,201 @@
+{% extends "base.html" %}
+
+{% block title %}Live AML Screener | AML Sentinel{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-10">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h3 class="fw-bold mb-1">Real-Time Financial Transaction Screener</h3>
+                <p class="text-muted mb-0">Evaluate transaction risk against banking AML compliance regulations</p>
+            </div>
+            <div>
+                <span class="badge bg-success-subtle text-success border border-success px-3 py-2">
+                    <i class="fa-solid fa-circle-check me-1"></i> Model Loaded: Gradient Boosting (v1.0)
+                </span>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <!-- Left Form -->
+            <div class="col-lg-6">
+                <div class="card card-custom p-4">
+                    <h5 class="fw-bold mb-3"><i class="fa-solid fa-sliders text-primary me-2"></i>Transaction Parameters</h5>
+                    
+                    <!-- Presets -->
+                    <div class="mb-3">
+                        <label class="form-label small text-muted fw-bold">QUICK TEST PRESETS</label>
+                        <div class="d-flex flex-wrap gap-2">
+                            <button type="button" class="btn btn-sm btn-outline-success" onclick="applyPreset(10, 85.50, 'credit', 2)">
+                                <i class="fa-solid fa-coffee me-1"></i> Normal Retail ($85.50)
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-danger" onclick="applyPreset(191, 9831.27, 'debit', 16)">
+                                <i class="fa-solid fa-shield-virus me-1"></i> Smurfing ($9,831)
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-warning text-dark" onclick="applyPreset(385, 9458.75, 'transfer', 22)">
+                                <i class="fa-solid fa-money-bill-transfer me-1"></i> Layering ($9,458)
+                            </button>
+                            <button type="button" class="btn btn-sm btn-outline-primary" onclick="applyPreset(50, 3200.00, 'transfer', 4)">
+                                <i class="fa-solid fa-building me-1"></i> Corporate ($3,200)
+                            </button>
+                        </div>
+                    </div>
+
+                    <form id="screenerForm">
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Customer ID (1 - 1000)</label>
+                                <input type="number" class="form-control" id="s_cid" value="191" min="1" max="1000" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Channel / Type</label>
+                                <select class="form-select" id="s_type">
+                                    <option value="debit" selected>Debit</option>
+                                    <option value="transfer">Transfer</option>
+                                    <option value="credit">Credit</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">Amount ($)</label>
+                                <input type="number" step="0.01" class="form-control" id="s_amount" value="9831.27" required>
+                            </div>
+                            <div class="col-6">
+                                <label class="form-label small fw-bold">7-Day Rolling Frequency</label>
+                                <input type="number" class="form-control" id="s_roll" value="16" min="1" max="60" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label small fw-bold">Transaction Date</label>
+                            <input type="date" class="form-control" id="s_date" value="2026-09-14">
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="s_btn">
+                            <i class="fa-solid fa-shield-halved me-1"></i> Run Compliance Risk Evaluation
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Right Results -->
+            <div class="col-lg-6">
+                <div class="card card-custom p-4 h-100" id="emptyState">
+                    <div class="text-center my-auto py-5">
+                        <i class="fa-solid fa-magnifying-glass-dollar fa-4x text-muted mb-3 opacity-50"></i>
+                        <h5 class="fw-bold">Ready for Transaction Screening</h5>
+                        <p class="text-muted small">Select a preset or enter transaction parameters on the left and click <strong>Run Compliance Risk Evaluation</strong>.</p>
+                    </div>
+                </div>
+
+                <div class="card card-custom p-4 d-none" id="resultCard">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="fw-bold mb-0">Compliance Risk Assessment</h5>
+                        <span id="tierBadgeFull" class="badge bg-danger fs-6 px-3 py-2">CRITICAL RISK</span>
+                    </div>
+
+                    <!-- Risk Gauge Meter -->
+                    <div class="text-center my-3">
+                        <div class="risk-gauge border border-4 border-danger text-danger bg-danger-subtle mb-2" id="gaugeCircle">
+                            <span id="gaugeValue">97.4%</span>
+                        </div>
+                        <div class="small fw-bold text-muted text-uppercase tracking-wider">Laundering Suspicion Index</div>
+                    </div>
+
+                    <hr class="my-3 text-muted">
+
+                    <!-- Customer Profile Metrics Summary -->
+                    <div class="row g-2 mb-3 text-center small">
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <div class="text-muted">Account Baseline</div>
+                                <div class="fw-bold" id="cMeanDisplay">$4,850.00</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <div class="text-muted">Z-Score Deviation</div>
+                                <div class="fw-bold" id="zScoreDisplay">+1.72 σ</div>
+                            </div>
+                        </div>
+                        <div class="col-4">
+                            <div class="p-2 border rounded bg-light">
+                                <div class="text-muted">Structuring Flag</div>
+                                <div class="fw-bold text-danger" id="structDisplay">Active ($8.5k-$9.9k)</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Triggered Rule Explanations -->
+                    <h6 class="fw-bold mb-2 small text-uppercase text-dark">Rule-Based Explanations & Typology Triggers:</h6>
+                    <div id="fullReasons" class="alert alert-light border small text-dark mb-0">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function applyPreset(cid, amt, type, roll) {
+    document.getElementById('s_cid').value = cid;
+    document.getElementById('s_amount').value = amt.toFixed(2);
+    document.getElementById('s_type').value = type;
+    document.getElementById('s_roll').value = roll;
+    document.getElementById('screenerForm').dispatchEvent(new Event('submit'));
+}
+
+document.getElementById('screenerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('s_btn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Evaluating AML Risk...';
+
+    const payload = {
+        customer_id: parseInt(document.getElementById('s_cid').value),
+        amount: parseFloat(document.getElementById('s_amount').value),
+        type: document.getElementById('s_type').value,
+        rolling_7d: parseFloat(document.getElementById('s_roll').value),
+        date: document.getElementById('s_date').value
+    };
+
+    try {
+        const response = await fetch('/api/screen-transaction', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        document.getElementById('emptyState').classList.add('d-none');
+        document.getElementById('resultCard').classList.remove('d-none');
+
+        document.getElementById('tierBadgeFull').innerText = data.risk_tier;
+        document.getElementById('tierBadgeFull').className = `badge bg-${data.badge_color} fs-6 px-3 py-2`;
+
+        document.getElementById('gaugeValue').innerText = data.risk_percentage;
+        document.getElementById('gaugeCircle').className = `risk-gauge border border-4 border-${data.badge_color} text-${data.badge_color} bg-${data.badge_color}-subtle mb-2`;
+
+        document.getElementById('cMeanDisplay').innerText = `$${data.input_summary.cust_mean.toFixed(2)}`;
+        document.getElementById('zScoreDisplay').innerText = `${data.input_summary.amount_zscore > 0 ? '+' : ''}${data.input_summary.amount_zscore.toFixed(2)} σ`;
+        document.getElementById('structDisplay').innerText = data.input_summary.structuring_flag ? 'Active ($8.5k-$9.9k)' : 'None';
+        document.getElementById('structDisplay').className = data.input_summary.structuring_flag ? 'fw-bold text-danger' : 'fw-bold text-success';
+
+        const reasonsDiv = document.getElementById('fullReasons');
+        reasonsDiv.innerHTML = '<ul class="ps-3 mb-0">' + data.reasons.map(r => `<li>${r}</li>`).join('') + '</ul>';
+
+    } catch(err) {
+        alert('Error screening transaction: ' + err);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-shield-halved me-1"></i> Run Compliance Risk Evaluation';
+    }
+});
+</script>
+{% endblock %}

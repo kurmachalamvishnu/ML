@@ -1,0 +1,284 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard | AML Sentinel{% endblock %}
+
+{% block content %}
+<!-- Page Header -->
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h2 class="fw-bold mb-1">Anti-Money Laundering Detection Engine</h2>
+        <p class="text-muted mb-0">Production Financial Transaction Risk Scoring & Typology Analysis System</p>
+    </div>
+    <div class="d-flex gap-2">
+        <a href="/screener" class="btn btn-primary fw-semibold">
+            <i class="fa-solid fa-bolt me-1"></i> Screen Single Transaction
+        </a>
+        <a href="/batch" class="btn btn-outline-dark fw-semibold">
+            <i class="fa-solid fa-file-csv me-1"></i> Upload Batch CSV
+        </a>
+    </div>
+</div>
+
+<!-- Stat KPI Cards -->
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card card-custom p-3 border-start border-primary border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Total Analyzed</span>
+                    <h3 class="fw-bold my-1">100,000</h3>
+                    <span class="badge bg-light text-primary border small">1,000 Accounts</span>
+                </div>
+                <div class="bg-primary-subtle text-primary p-3 rounded-circle">
+                    <i class="fa-solid fa-database fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom p-3 border-start border-danger border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Flagged Laundering</span>
+                    <h3 class="fw-bold my-1 text-danger">1,166</h3>
+                    <span class="badge bg-danger-subtle text-danger small">1.17% Positive Rate</span>
+                </div>
+                <div class="bg-danger-subtle text-danger p-3 rounded-circle">
+                    <i class="fa-solid fa-triangle-exclamation fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom p-3 border-start border-success border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">Model Accuracy</span>
+                    <h3 class="fw-bold my-1 text-success">99.86%</h3>
+                    <span class="badge bg-success-subtle text-success small">Zero Data Leakage</span>
+                </div>
+                <div class="bg-success-subtle text-success p-3 rounded-circle">
+                    <i class="fa-solid fa-bullseye fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-custom p-3 border-start border-info border-4">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <span class="text-muted small fw-semibold text-uppercase">ROC-AUC Score</span>
+                    <h3 class="fw-bold my-1 text-info">0.9995</h3>
+                    <span class="badge bg-info-subtle text-info small">Gradient Boosting</span>
+                </div>
+                <div class="bg-info-subtle text-info p-3 rounded-circle">
+                    <i class="fa-solid fa-chart-area fa-lg"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content Grid -->
+<div class="row g-4">
+    <!-- Left Column: Quick Screener Form -->
+    <div class="col-lg-5">
+        <div class="card card-custom p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold mb-0">
+                    <i class="fa-solid fa-bolt text-warning me-2"></i>Quick Transaction Screener
+                </h5>
+                <span class="badge bg-dark text-white">Live Real-Time</span>
+            </div>
+            <p class="text-muted small">Test any financial transaction instant risk score.</p>
+
+            <form id="quickScreenerForm">
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">Customer Account ID</label>
+                    <input type="number" class="form-control" id="customerId" value="191" min="1" max="1000" required>
+                    <div class="form-text small">Select any account ID (1 - 1000).</div>
+                </div>
+                <div class="row g-2 mb-3">
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">Amount ($)</label>
+                        <input type="number" step="0.01" class="form-control" id="amount" value="9831.27" required>
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label small fw-semibold">Channel / Type</label>
+                        <select class="form-select" id="txType">
+                            <option value="debit" selected>Debit</option>
+                            <option value="transfer">Transfer</option>
+                            <option value="credit">Credit</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label small fw-semibold">7-Day Rolling Frequency</label>
+                    <input type="number" class="form-control" id="rolling7d" value="14" min="1" max="50">
+                    <div class="form-text small">Number of transactions by customer in the last 7 days.</div>
+                </div>
+
+                <div class="d-flex gap-2 mb-3">
+                    <button type="button" class="btn btn-sm btn-outline-secondary w-50" onclick="loadPreset('normal')">
+                        Normal Case ($150)
+                    </button>
+                    <button type="button" class="btn btn-sm btn-outline-danger w-50" onclick="loadPreset('structuring')">
+                        Smurfing ($9,831)
+                    </button>
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 fw-bold py-2" id="submitBtn">
+                    <i class="fa-solid fa-magnifying-glass-chart me-1"></i> Screen Transaction
+                </button>
+            </form>
+
+            <!-- Result Box -->
+            <div id="resultBox" class="mt-4 p-3 rounded bg-light border d-none">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="small text-muted fw-bold">RISK EVALUATION</span>
+                    <span id="tierBadge" class="badge bg-danger">CRITICAL RISK</span>
+                </div>
+                <div class="d-flex align-items-baseline gap-2 mb-2">
+                    <h2 class="fw-bold mb-0 text-dark" id="riskPercent">97.37%</h2>
+                    <span class="text-muted small">Suspicion Probability</span>
+                </div>
+                <div class="progress mb-3" style="height: 8px;">
+                    <div id="riskBar" class="progress-bar bg-danger" style="width: 97%;"></div>
+                </div>
+                <div class="small fw-semibold mb-1 text-dark">Rule-Based Explanations:</div>
+                <ul id="reasonsList" class="small text-secondary ps-3 mb-0"></ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: AML Typology Breakdown & System Architecture -->
+    <div class="col-lg-7">
+        <div class="card card-custom p-4 mb-4">
+            <h5 class="fw-bold mb-3">
+                <i class="fa-solid fa-shield-virus text-primary me-2"></i>Automated AML Typologies Detected
+            </h5>
+            <div class="row g-3">
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light-subtle h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-danger"><i class="fa-solid fa-layer-group"></i></span>
+                            <h6 class="fw-bold mb-0">Structuring / Smurfing</h6>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            Detects intentional transaction amounts split between <strong>$8,500 and $9,999</strong> to avoid mandatory $10,000 regulatory reporting limits (Bank Secrecy Act / CTR).
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light-subtle h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-warning text-dark"><i class="fa-solid fa-gauge-high"></i></span>
+                            <h6 class="fw-bold mb-0">7-Day Velocity Spikes</h6>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            Identifies sudden rapid movements of funds where transfer frequency in a 7-day rolling window sharply deviates from customer baseline.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light-subtle h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-info text-dark"><i class="fa-solid fa-chart-line"></i></span>
+                            <h6 class="fw-bold mb-0">Z-Score Baseline Deviations</h6>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            Measures standard deviations from the customer's historical average amount ($Z > 2.5$), detecting anomalous spikes in account activity.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="border rounded p-3 bg-light-subtle h-100">
+                        <div class="d-flex align-items-center gap-2 mb-2">
+                            <span class="badge bg-success"><i class="fa-solid fa-tree"></i></span>
+                            <h6 class="fw-bold mb-0">Ensemble Tree Optimization</h6>
+                        </div>
+                        <p class="small text-muted mb-0">
+                            Gradient Boosting and Tuned XGBoost models learn non-linear interactions across features with <strong>95.96% Precision</strong> and <strong>91.85% Recall</strong>.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- System Pipeline Architecture Card -->
+        <div class="card card-custom p-4">
+            <h5 class="fw-bold mb-3">
+                <i class="fa-solid fa-diagram-project text-info me-2"></i>Machine Learning Pipeline Architecture
+            </h5>
+            <div class="p-3 bg-dark text-light rounded code-font small mb-0 overflow-auto">
+                Raw Data (100k Transactions) ──> Zero-Leakage Preprocessor (StandardScaler on X_train)
+                                             ──> 15 Engineered Domain Features
+                                             ──> 5-Fold Stratified Cross-Validation
+                                             ──> Gradient Boosting Classifier (F1: 0.9386, ROC-AUC: 0.9995)
+                                             ──> Real-Time Risk Score & Decision Tiers (Low/Med/High/Critical)
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function loadPreset(type) {
+    if (type === 'normal') {
+        document.getElementById('customerId').value = 10;
+        document.getElementById('amount').value = 150.00;
+        document.getElementById('txType').value = 'credit';
+        document.getElementById('rolling7d').value = 2;
+    } else {
+        document.getElementById('customerId').value = 191;
+        document.getElementById('amount').value = 9831.27;
+        document.getElementById('txType').value = 'debit';
+        document.getElementById('rolling7d').value = 16;
+    }
+}
+
+document.getElementById('quickScreenerForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = document.getElementById('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin me-1"></i> Screening...';
+
+    const payload = {
+        customer_id: parseInt(document.getElementById('customerId').value),
+        amount: parseFloat(document.getElementById('amount').value),
+        type: document.getElementById('txType').value,
+        rolling_7d: parseFloat(document.getElementById('rolling7d').value)
+    };
+
+    try {
+        const response = await fetch('/api/screen-transaction', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify(payload)
+        });
+        const data = await response.json();
+
+        document.getElementById('resultBox').classList.remove('d-none');
+        document.getElementById('riskPercent').innerText = data.risk_percentage;
+        document.getElementById('tierBadge').innerText = data.risk_tier;
+        document.getElementById('tierBadge').className = `badge bg-${data.badge_color}`;
+        document.getElementById('riskBar').style.width = data.risk_percentage;
+        document.getElementById('riskBar').className = `progress-bar bg-${data.badge_color}`;
+
+        const list = document.getElementById('reasonsList');
+        list.innerHTML = '';
+        data.reasons.forEach(r => {
+            const li = document.createElement('li');
+            li.innerText = r;
+            list.appendChild(li);
+        });
+    } catch(err) {
+        alert('Error screening transaction: ' + err);
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fa-solid fa-magnifying-glass-chart me-1"></i> Screen Transaction';
+    }
+});
+</script>
+{% endblock %}
